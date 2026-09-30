@@ -91,6 +91,10 @@ function fmt(metric, v){
 function fieldCard(title, data){
   const verdict = data.verdict||'unknown';
   const vlabel = verdict==='pass'?'✅ Passed':verdict==='fail'?'❌ Failed':'— No field data';
+  const scope = data.scope||'none';
+  const scopeLabel = scope==='url' ? 'this page (URL)'
+                   : scope==='origin' ? 'site-wide (origin) — no URL-level data for this page'
+                   : 'no data';
   let rows='';
   for(const m of FIELD_ORDER){
     const cell=data.metrics&&data.metrics[m];
@@ -100,7 +104,7 @@ function fieldCard(title, data){
       <span class="val"><i class="dot ${zone}"></i>${val}</span></div>`;
   }
   return `<div class="card"><h2>${title} · Field (CWV verdict)</h2>
-    <div class="src">CrUX real users · p75 · 28-day</div>
+    <div class="src">CrUX real users · p75 · 28-day · ${scopeLabel}</div>
     <div class="verdict ${verdict}">${vlabel}</div>${rows}</div>`;
 }
 function labTable(title, data){
