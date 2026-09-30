@@ -15,8 +15,9 @@ env:
   TARGET_URL: 'https://www.squadstack.ai/'
   SITESPEED_VERSION: '39.5.0'   # pin a known version; bump deliberately
   RUNS: '7'                     # median of N runs; 7 balances signal vs CI minutes
-  SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}  # channel ID or name the bot posts to
-  # Amber heads-up recipients (Slack member IDs, e.g. <@U01ABC234>). Comma-separated inside the mention string.
+  SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+  # v1 = mode A: amber posts with NO mention, so AMBER_MENTION is unused for now.
+  # Kept here for v2 if you decide amber should ping specific people again.
   AMBER_MENTION: ${{ secrets.AMBER_MENTION }}
 
 jobs:
@@ -72,13 +73,15 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
         run: |
+          # v1 mode A: amber posts to the channel WITHOUT mentioning anyone (ambient signal).
+          # Red still pings the whole channel. To restore amber mentions in a later version,
+          # add back: --mention "${AMBER_MENTION}"
           python3 scripts/slack_notify.py \
             --severity amber \
             --device "${{ matrix.device }}" \
             --url "${TARGET_URL}" \
             --budget-file "${{ steps.amber.outputs.file }}" \
-            --channel "${SLACK_CHANNEL}" \
-            --mention "${AMBER_MENTION}"
+            --channel "${SLACK_CHANNEL}"
 
       # ---- RED (hard): real exit code; a breach fails this step and the build ----
       - name: Red blocker budget (${{ matrix.device }})
