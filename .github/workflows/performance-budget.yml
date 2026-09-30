@@ -1,0 +1,132 @@
+name: Performance Budget
+
+# Triggers:
+#  - schedule: daily safety-net run (catches drift + keeps the dashboard's field data fresh)
+#  - workflow_dispatch: manual "Run workflow" button + on-demand checks before a launch
+#  - repository_dispatch: fired by the Webflow publish webhook relay (added later; harmless until then)
+on:
+  schedule:
+    - cron: '0 3 * * *'        # 03:00 UTC daily
+  workflow_dispatch:
+  repository_dispatch:
+    types: [webflow-publish]
+
+env:
+  TARGET_URL: 'https://www.squadstack.ai/'
+  SITESPEED_VERSION: '39.5.0'   # pin a known version; bump deliberately
+  RUNS: '7'                     # median of N runs; 7 balances signal vs CI minutes
+  SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}  # channel ID or name the bot posts to
+  # Amber heads-up recipients (Slack member IDs, e.g. <@U01ABC234>). Comma-separated inside the mention string.
+  AMBER_MENTION: ${{ secrets.AMBER_MENTION }}
+
+jobs:
+  # ======================================================================
+  # One job per device profile. Each runs the red (hard) and amber (soft)
+  # budgets, captures JSON output, and reports severity to Slack.
+  # ======================================================================
+  budget:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - device: mobile
+            flags: '--mobile -c 3g --browsertime.connectivity.engine=throttle'
+            red: '.github/budget.mobile.json'
+            warn: '.github/budget.mobile.warn.json'
+          - device: desktop
+            flags: '-c cable --browsertime.connectivity.engine=throttle'
+            red: '.github/budget.desktop.json'
+            warn: '.github/budget.desktop.warn.json'
+    name: budget-${{ matrix.device }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ---- AMBER (soft): suppress exit code so it never fails the build ----
+      - name: Amber warn budget (${{ matrix.device }})
+        id: amber
+        run: |
+          mkdir -p out-${{ matrix.device }}
+          docker run --rm --cap-add=NET_ADMIN --shm-size=1g \
+            -v "$(pwd):/sitespeed.io" \
+            sitespeedio/sitespeed.io:${{ env.SITESPEED_VERSION }} \
+            "${TARGET_URL}" \
+            ${{ matrix.flags }} \
+            -n ${{ env.RUNS }} \
+            --budget.configPath ${{ matrix.warn }} \
+            --budget.output json \
+            --budget.suppressExitCode true \
+            --outputFolder out-${{ matrix.device }}/amber
+          # Sitespeed writes budgetResult.json under the output folder.
+          AMBER_FILE=$(find out-${{ matrix.device }}/amber -name 'budgetResult.json' | head -1)
+          echo "file=$AMBER_FILE" >> "$GITHUB_OUTPUT"
+          if [ -n "$AMBER_FILE" ] && grep -q '"status":"fail"' "$AMBER_FILE"; then
+            echo "breached=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "breached=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Post amber heads-up to Slack
+        if: steps.amber.outputs.breached == 'true'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        run: |
+          python3 scripts/slack_notify.py \
+            --severity amber \
+            --device "${{ matrix.device }}" \
+            --url "${TARGET_URL}" \
+            --budget-file "${{ steps.amber.outputs.file }}" \
+            --channel "${SLACK_CHANNEL}" \
+            --mention "${AMBER_MENTION}"
+
+      # ---- RED (hard): real exit code; a breach fails this step and the build ----
+      - name: Red blocker budget (${{ matrix.device }})
+        id: red
+        continue-on-error: true   # let the workflow reach the Slack step; we fail explicitly after
+        run: |
+          docker run --rm --cap-add=NET_ADMIN --shm-size=1g \
+            -v "$(pwd):/sitespeed.io" \
+            sitespeedio/sitespeed.io:${{ env.SITESPEED_VERSION }} \
+            "${TARGET_URL}" \
+            ${{ matrix.flags }} \
+            -n ${{ env.RUNS }} \
+            --budget.configPath ${{ matrix.red }} \
+            --budget.output json \
+            --outputFolder out-${{ matrix.device }}/red
+
+      - name: Locate red budget result
+        id: redfile
+        if: always()
+        run: |
+          RED_FILE=$(find out-${{ matrix.device }}/red -name 'budgetResult.json' | head -1)
+          echo "file=$RED_FILE" >> "$GITHUB_OUTPUT"
+
+      - name: Post red blocker to Slack
+        if: steps.red.outcome == 'failure'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        run: |
+          python3 scripts/slack_notify.py \
+            --severity red \
+            --device "${{ matrix.device }}" \
+            --url "${TARGET_URL}" \
+            --budget-file "${{ steps.redfile.outputs.file }}" \
+            --channel "${SLACK_CHANNEL}"
+
+      # Keep the full Sitespeed report + budget JSON as a downloadable artifact,
+      # and as the history the dashboard reads.
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sitespeed-${{ matrix.device }}-${{ github.run_id }}
+          path: out-${{ matrix.device }}
+          retention-days: 90
+
+      # Make the build red if the red budget breached (after Slack has posted).
+      - name: Fail build on red breach
+        if: steps.red.outcome == 'failure'
+        run: |
+          echo "Red performance budget breached on ${{ matrix.device }} — see Slack + artifact."
+          exit 1
