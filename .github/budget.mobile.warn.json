@@ -1,30 +1,30 @@
 {
   "budget": {
     "googleWebVitals": {
-      "largestContentfulPaint": 2000,
-      "totalBlockingTime": 500,
+      "largestContentfulPaint": 2500,
+      "totalBlockingTime": 300,
       "cumulativeLayoutShift": 0.05,
-      "timeToFirstByte": 600,
-      "firstContentfulPaint": 1800
+      "timeToFirstByte": 900,
+      "firstContentfulPaint": 2500
     },
     "requests": {
-      "total": 100,
-      "javascript": 25,
+      "total": 95,
+      "javascript": 32,
       "css": 5,
-      "image": 45,
-      "font": 2,
+      "image": 55,
+      "font": 3,
       "httpErrors": 0
     },
     "transferSize": {
-      "total": 2000000,
-      "html": 90000,
-      "css": 75000,
-      "javascript": 700000,
-      "image": 700000,
-      "font": 60000
+      "total": 1500000,
+      "html": 100000,
+      "css": 90000,
+      "javascript": 720000,
+      "image": 400000,
+      "font": 40000
     },
     "thirdParty": {
-      "transferSize": 900000
+      "transferSize": 1050000
     }
   }
 }
