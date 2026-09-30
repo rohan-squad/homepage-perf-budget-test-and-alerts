@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SquadStack Performance Dashboard</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --line:#2a2f3a;
+    --ink:#e7eaf0; --dim:#9aa3b2; --faint:#6b7280;
+    --green-bg:#12291b; --green:#5fd08a; --green-line:#1f5335;
+    --amber-bg:#2c2410; --amber:#e6b450; --amber-line:#5a4718;
+    --red-bg:#2e1417; --red:#f0787f; --red-line:#5e2126;
+    --accent:#7c8cff;
+    box-sizing:border-box; padding-top:env(safe-area-inset-top,0); padding-bottom:env(safe-area-inset-bottom,0);
+  }
+  *,*::before,*::after{box-sizing:inherit}
+  @media(prefers-color-scheme:light){:root:not([data-theme=dark]){
+    --bg:#f6f7f9;--panel:#fff;--panel2:#f0f2f5;--line:#e2e5ea;--ink:#1a1d24;--dim:#55606f;--faint:#8a94a3;
+    --green-bg:#e6f6ec;--green:#1a8a4a;--green-line:#b7e3c6;--amber-bg:#fdf3dd;--amber:#9a6b00;--amber-line:#f0d99a;
+    --red-bg:#fde7e9;--red:#c0303a;--red-line:#f3c2c6;--accent:#4a56cc;}}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1000px;margin:0 auto;padding:32px 20px 80px}
+  header{margin-bottom:8px}
+  h1{font-size:26px;letter-spacing:-.02em;margin:0 0 4px}
+  .sub{color:var(--faint);font-size:13px}
+  .rule-note{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:12px 16px;margin:20px 0;font-size:13.5px;color:var(--dim)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+  @media(max-width:720px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+  .card h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);margin:0 0 2px;font-weight:600}
+  .card .src{font-size:11.5px;color:var(--faint);margin-bottom:14px}
+  .verdict{display:inline-flex;align-items:center;gap:7px;font-weight:700;font-size:14px;padding:4px 12px;border-radius:20px;margin-bottom:14px}
+  .verdict.pass{background:var(--green-bg);color:var(--green);border:1px solid var(--green-line)}
+  .verdict.fail{background:var(--red-bg);color:var(--red);border:1px solid var(--red-line)}
+  .verdict.unknown{background:var(--panel2);color:var(--dim);border:1px solid var(--line)}
+  .metric-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .metric-row:last-child{border-bottom:none}
+  .metric-name{color:var(--dim)}
+  .val{display:inline-flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums}
+  .dot{width:9px;height:9px;border-radius:50%;flex:none}
+  .dot.green{background:var(--green)} .dot.amber{background:var(--amber)} .dot.red{background:var(--red)} .dot.unknown{background:var(--faint)}
+  .sech{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--accent);font-weight:700;margin:34px 0 10px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--faint);font-weight:600}
+  td.m{color:var(--dim)}
+  .pill{display:inline-block;padding:1px 9px;border-radius:20px;font-size:12px;font-weight:600}
+  .pill.working{background:var(--green-bg);color:var(--green)} .pill.failing{background:var(--red-bg);color:var(--red)}
+  .foot{margin-top:30px;color:var(--faint);font-size:12px}
+  .loading,.error{padding:40px;text-align:center;color:var(--dim)}
+  .error{color:var(--red)}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--dim);margin-top:6px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .wide{grid-column:1/-1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Homepage Performance Dashboard</h1>
+    <div class="sub" id="sub">Loading…</div>
+  </header>
+
+  <div class="rule-note">
+    <strong>Two sources, two jobs.</strong> <b>Field</b> (CrUX, real users) decides whether we <em>pass Core Web Vitals</em>.
+    <b>Lab</b> (Sitespeed, this run) decides whether a change <em>regressed</em>. They're shown separately and never blended.
+    <div class="legend">
+      <span><i class="dot green"></i>green — target</span>
+      <span><i class="dot amber"></i>amber — watch</span>
+      <span><i class="dot red"></i>red — over limit</span>
+      <span><i class="dot unknown"></i>no data</span>
+    </div>
+  </div>
+
+  <div id="content"><div class="loading">Loading dashboard data…</div></div>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+const FIELD_UNITS = {LCP:'ms',INP:'ms',CLS:'',FCP:'ms',TTFB:'ms'};
+const FIELD_ORDER = ['LCP','INP','CLS','FCP','TTFB'];
+
+function fmt(metric, v){
+  if(v==null) return '—';
+  if(metric==='CLS') return (Math.round(v*1000)/1000).toString();
+  if(v>=1000) return (v/1000).toFixed(2)+' s';
+  return Math.round(v)+' ms';
+}
+function fieldCard(title, data){
+  const verdict = data.verdict||'unknown';
+  const vlabel = verdict==='pass'?'✅ Passed':verdict==='fail'?'❌ Failed':'— No field data';
+  let rows='';
+  for(const m of FIELD_ORDER){
+    const cell=data.metrics&&data.metrics[m];
+    const zone=cell?cell.zone:'unknown';
+    const val=cell?fmt(m,cell.value):'—';
+    rows+=`<div class="metric-row"><span class="metric-name">${m}</span>
+      <span class="val"><i class="dot ${zone}"></i>${val}</span></div>`;
+  }
+  return `<div class="card"><h2>${title} · Field (CWV verdict)</h2>
+    <div class="src">CrUX real users · p75 · 28-day</div>
+    <div class="verdict ${verdict}">${vlabel}</div>${rows}</div>`;
+}
+function labTable(title, data){
+  const passed=data.passed;
+  const vlabel = passed===true?'✅ Passed':passed===false?`❌ ${data.failing_count} failing`:'—';
+  const vcls = passed===true?'pass':passed===false?'fail':'unknown';
+  let rows='';
+  (data.metrics||[]).forEach(it=>{
+    const st=it.status==='failing'?'failing':'working';
+    rows+=`<tr><td class="m">${it.metric||''}</td><td>${it.value??'—'}</td><td>${it.limit??'—'}</td>
+      <td><span class="pill ${st}">${st==='failing'?'over':'ok'}</span></td></tr>`;
+  });
+  return `<div class="card wide"><h2>${title} · Lab (regression gate)</h2>
+    <div class="src">Sitespeed 3gfast · 10-run median · this run</div>
+    <div class="verdict ${vcls}">${vlabel}</div>
+    <table><thead><tr><th>Metric</th><th>Value</th><th>Limit</th><th></th></tr></thead>
+    <tbody>${rows}</tbody></table></div>`;
+}
+
+fetch('dashboard-data.json?_='+Date.now())
+  .then(r=>{if(!r.ok)throw new Error('dashboard-data.json not found ('+r.status+')');return r.json();})
+  .then(d=>{
+    const gen = d.generated ? new Date(d.generated) : null;
+    document.getElementById('sub').textContent =
+      (d.origin||'') + (gen? ' · updated '+gen.toLocaleString() : '');
+    let html = '<div class="sech">Field — the Core Web Vitals verdict</div><div class="grid">';
+    html += fieldCard('Mobile', d.field.mobile||{});
+    html += fieldCard('Desktop', d.field.desktop||{});
+    html += '</div>';
+    html += '<div class="sech">Lab — the regression gate</div><div class="grid">';
+    html += labTable('Mobile', d.lab.mobile||{});
+    html += labTable('Desktop', d.lab.desktop||{});
+    html += '</div>';
+    document.getElementById('content').innerHTML = html;
+    document.getElementById('foot').innerHTML =
+      'Field source: '+(d.field.source||'CrUX')+' · Lab source: '+(d.lab.source||'Sitespeed')+
+      '. Field decides CWV pass/fail; lab decides regression. Refreshed on every workflow run.';
+  })
+  .catch(e=>{
+    document.getElementById('content').innerHTML =
+      '<div class="error">Could not load data: '+e.message+
+      '<br><br>The dashboard fills in after the first workflow run commits <code>dashboard-data.json</code>.</div>';
+    document.getElementById('sub').textContent='';
+  });
+</script>
+</body>
+</html>
