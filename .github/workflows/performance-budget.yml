@@ -186,13 +186,13 @@ jobs:
           python3 scripts/build_dashboard_data.py \
             --mobile-budget "${{ steps.find.outputs.mobile }}" \
             --desktop-budget "${{ steps.find.outputs.desktop }}" \
-            --out dashboard/dashboard-data.json
+            --out docs/dashboard-data.json
 
       - name: Commit dashboard data
         run: |
           git config user.name "perf-budget-bot"
           git config user.email "actions@github.com"
-          git add dashboard/dashboard-data.json
+          git add docs/dashboard-data.json
           if git diff --staged --quiet; then
             echo "No dashboard data change."
           else
