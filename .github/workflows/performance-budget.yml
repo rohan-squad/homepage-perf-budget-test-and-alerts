@@ -133,3 +133,66 @@ jobs:
         run: |
           echo "Red performance budget breached on ${{ matrix.device }} — see Slack + artifact."
           exit 1
+
+  # ======================================================================
+  # After both device jobs finish, build dashboard-data.json:
+  #   - pull CrUX field data (real users) via the CrUX API
+  #   - read both Sitespeed budget results (lab)
+  #   - commit the combined JSON so the GitHub Pages dashboard can read it
+  # Runs even if a budget job failed (always()), so the dashboard always refreshes.
+  # ======================================================================
+  dashboard-data:
+    needs: budget
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed to commit dashboard-data.json back to the repo
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download mobile results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: sitespeed-mobile-*
+          path: dl-mobile
+          merge-multiple: true
+
+      - name: Download desktop results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: sitespeed-desktop-*
+          path: dl-desktop
+          merge-multiple: true
+
+      - name: Locate budget result files
+        id: find
+        run: |
+          MOBILE=$(find dl-mobile -path '*red*budgetResult.json' | head -1)
+          DESKTOP=$(find dl-desktop -path '*red*budgetResult.json' | head -1)
+          echo "mobile=$MOBILE" >> "$GITHUB_OUTPUT"
+          echo "desktop=$DESKTOP" >> "$GITHUB_OUTPUT"
+          echo "Found mobile: $MOBILE"
+          echo "Found desktop: $DESKTOP"
+
+      - name: Build dashboard-data.json
+        env:
+          CRUX_API_KEY: ${{ secrets.CRUX_API_KEY }}
+          TARGET_ORIGIN: 'https://www.squadstack.ai'
+        run: |
+          python3 scripts/build_dashboard_data.py \
+            --mobile-budget "${{ steps.find.outputs.mobile }}" \
+            --desktop-budget "${{ steps.find.outputs.desktop }}" \
+            --out dashboard/dashboard-data.json
+
+      - name: Commit dashboard data
+        run: |
+          git config user.name "perf-budget-bot"
+          git config user.email "actions@github.com"
+          git add dashboard/dashboard-data.json
+          if git diff --staged --quiet; then
+            echo "No dashboard data change."
+          else
+            git commit -m "Update dashboard data [skip ci]"
+            git push
+          fi
