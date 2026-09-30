@@ -51,8 +51,52 @@ def zone_for(metric, value):
         return "amber"
     return "red"
 
-def query_crux(origin, form_factor, key):
-    """Return {metric: {value, zone}} for one form factor, or {} on any failure."""
+def _crux_call(scope_key, scope_value, form_factor, key):
+    """One CrUX call. scope_key is 'url' or 'origin'. Returns parsed metrics dict or None."""
+    body = json.dumps({
+        scope_key: scope_value,
+        "formFactor": form_factor,
+        "metrics": list(CRUX_MAP.keys()),
+    }).encode()
+    endpoint = f"{CRUX_ENDPOINT}?key={key}"
+    req = urllib.request.Request(endpoint, data=body,
+                                 headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            data = json.loads(resp.read().decode())
+    except Exception as e:
+        print(f"CrUX {form_factor} {scope_key} query failed: {e}", file=sys.stderr)
+        return None
+    return data.get("record", {}).get("metrics", {})
+
+def query_crux(target_url, target_origin, form_factor, key):
+    """
+    Prefer URL-level data (the specific page). Fall back to origin only if the URL
+    has no CrUX record (low-traffic page). Returns {metric:{value,zone}, ...} plus
+    a '_scope' marker so the dashboard can show which dataset was used.
+    """
+    metrics = _crux_call("url", target_url, form_factor, key)
+    scope = "url"
+    if not metrics:
+        metrics = _crux_call("origin", target_origin, form_factor, key)
+        scope = "origin" if metrics else "none"
+    out = {"_scope": scope}
+    for crux_key, short in CRUX_MAP.items():
+        m = (metrics or {}).get(crux_key)
+        if not m:
+            continue
+        p75 = m.get("percentiles", {}).get("p75")
+        if p75 is None:
+            continue
+        try:
+            val = float(p75)
+        except (TypeError, ValueError):
+            continue
+        out[short] = {"value": val, "zone": zone_for(short, val)}
+    return out
+
+def _query_crux_legacy(origin, form_factor, key):
+    """(unused) previous origin-only implementation kept for reference."""
     body = json.dumps({
         "origin": origin,
         "formFactor": form_factor,
@@ -123,12 +167,15 @@ def main():
     args = ap.parse_args()
 
     origin = os.environ.get("TARGET_ORIGIN", "https://www.squadstack.ai")
+    # The specific page to report on. Defaults to the homepage URL (with trailing slash),
+    # which is what the homepage budget is about. URL-level CrUX != origin-level.
+    target_url = os.environ.get("TARGET_URL", origin.rstrip("/") + "/")
     key = os.environ.get("CRUX_API_KEY", "")
 
     field = {"mobile": {}, "desktop": {}}
     if key:
-        field["mobile"] = query_crux(origin, "PHONE", key)
-        field["desktop"] = query_crux(origin, "DESKTOP", key)
+        field["mobile"] = query_crux(target_url, origin, "PHONE", key)
+        field["desktop"] = query_crux(target_url, origin, "DESKTOP", key)
     else:
         print("CRUX_API_KEY not set — field section will be empty.", file=sys.stderr)
 
@@ -142,12 +189,21 @@ def main():
             return "unknown"
         return "pass" if all(z == "green" for z in core) else "fail"
 
+    def split_scope(ff):
+        vals = dict(field[ff])
+        scope = vals.pop("_scope", "none")
+        return vals, scope
+
+    m_metrics, m_scope = split_scope("mobile")
+    d_metrics, d_scope = split_scope("desktop")
+
     payload = {
         "generated": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "origin": origin,
+        "url": target_url,
         "field": {
-            "mobile":  {"metrics": field["mobile"],  "verdict": field_verdict("mobile")},
-            "desktop": {"metrics": field["desktop"], "verdict": field_verdict("desktop")},
+            "mobile":  {"metrics": m_metrics, "verdict": field_verdict("mobile"), "scope": m_scope},
+            "desktop": {"metrics": d_metrics, "verdict": field_verdict("desktop"), "scope": d_scope},
             "source": "CrUX API (real users, p75, 28-day)",
         },
         "lab": {
