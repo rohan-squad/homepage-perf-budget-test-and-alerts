@@ -1,0 +1,30 @@
+{
+  "budget": {
+    "timings": {
+      "largestContentfulPaint": 2000,
+      "totalBlockingTime": 500,
+      "cumulativeLayoutShift": 0.05,
+      "ttfb": 600,
+      "firstContentfulPaint": 1800
+    },
+    "requests": {
+      "total": 100,
+      "javascript": 25,
+      "css": 5,
+      "image": 45,
+      "font": 2,
+      "httpErrors": 0
+    },
+    "transferSize": {
+      "total": 2000000,
+      "html": 90000,
+      "css": 75000,
+      "javascript": 120000,
+      "image": 700000,
+      "font": 60000
+    },
+    "thirdParty": {
+      "transferSize": 900000
+    }
+  }
+}
