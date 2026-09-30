@@ -1,10 +1,10 @@
 {
   "budget": {
-    "timings": {
+    "googleWebVitals": {
       "largestContentfulPaint": 1500,
       "totalBlockingTime": 200,
       "cumulativeLayoutShift": 0.1,
-      "ttfb": 200,
+      "timeToFirstByte": 200,
       "firstContentfulPaint": 1800
     },
     "requests": {
