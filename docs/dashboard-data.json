@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-04T04:42:33.771866+00:00",
+  "generated": "2026-10-05T03:16:21.066254+00:00",
   "origin": "https://www.squadstack.ai",
   "url": "https://www.squadstack.ai/",
   "field": {
@@ -63,7 +63,7 @@
         {
           "metric": "Largest Contentful Paint",
           "type": "googleWebVitals",
-          "value": "2.764 s",
+          "value": "2.640 s",
           "limit": "3.000 s",
           "status": "working"
         },
@@ -84,14 +84,14 @@
         {
           "metric": "Time to First Byte",
           "type": "googleWebVitals",
-          "value": "623 ms",
+          "value": "576 ms",
           "limit": "1.000 s",
           "status": "working"
         },
         {
           "metric": "First Contentful Paint",
           "type": "googleWebVitals",
-          "value": "2.764 s",
+          "value": "2.640 s",
           "limit": "3.000 s",
           "status": "working"
         },
@@ -195,14 +195,14 @@
         {
           "metric": "Time to First Byte",
           "type": "googleWebVitals",
-          "value": "160 ms",
+          "value": "192 ms",
           "limit": "500 ms",
           "status": "working"
         },
         {
           "metric": "First Contentful Paint",
           "type": "googleWebVitals",
-          "value": "796 ms",
+          "value": "836 ms",
           "limit": "3.000 s",
           "status": "working"
         },
@@ -251,7 +251,7 @@
         {
           "metric": "JavaScript Transfer Size",
           "type": "transferSize",
-          "value": "175.7 KB",
+          "value": "175.8 KB",
           "limit": "1.0 MB",
           "status": "working"
         },
@@ -279,7 +279,7 @@
         {
           "metric": "Largest Contentful Paint",
           "type": "googleWebVitals",
-          "value": "2.016 s",
+          "value": "2.136 s",
           "limit": "2.000 s",
           "status": "failing"
         },
