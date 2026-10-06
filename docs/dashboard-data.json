@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-05T17:38:31.293465+00:00",
+  "generated": "2026-10-06T03:15:09.255060+00:00",
   "origin": "https://www.squadstack.ai",
   "url": "https://www.squadstack.ai/",
   "field": {
@@ -63,7 +63,7 @@
         {
           "metric": "Largest Contentful Paint",
           "type": "googleWebVitals",
-          "value": "2.732 s",
+          "value": "2.900 s",
           "limit": "3.000 s",
           "status": "working"
         },
@@ -84,14 +84,14 @@
         {
           "metric": "Time to First Byte",
           "type": "googleWebVitals",
-          "value": "592 ms",
+          "value": "638 ms",
           "limit": "1.000 s",
           "status": "working"
         },
         {
           "metric": "First Contentful Paint",
           "type": "googleWebVitals",
-          "value": "2.732 s",
+          "value": "2.900 s",
           "limit": "3.000 s",
           "status": "working"
         },
@@ -133,21 +133,21 @@
         {
           "metric": "HTML Transfer Size",
           "type": "transferSize",
-          "value": "76.3 KB",
+          "value": "76.4 KB",
           "limit": "127.0 KB",
           "status": "working"
         },
         {
           "metric": "CSS Transfer Size",
           "type": "transferSize",
-          "value": "76.5 KB",
+          "value": "76.6 KB",
           "limit": "107.4 KB",
           "status": "working"
         },
         {
           "metric": "JavaScript Transfer Size",
           "type": "transferSize",
-          "value": "175.4 KB",
+          "value": "175.3 KB",
           "limit": "781.3 KB",
           "status": "working"
         },
@@ -168,7 +168,7 @@
         {
           "metric": "Third Party Transfer Size",
           "type": "thirdParty",
-          "value": "967.3 KB",
+          "value": "967.2 KB",
           "limit": "1.5 MB",
           "status": "working"
         }
@@ -181,7 +181,7 @@
         {
           "metric": "Largest Contentful Paint",
           "type": "googleWebVitals",
-          "value": "1.952 s",
+          "value": "1.968 s",
           "limit": "2.000 s",
           "status": "working"
         },
@@ -202,14 +202,14 @@
         {
           "metric": "Time to First Byte",
           "type": "googleWebVitals",
-          "value": "168 ms",
+          "value": "150 ms",
           "limit": "500 ms",
           "status": "working"
         },
         {
           "metric": "First Contentful Paint",
           "type": "googleWebVitals",
-          "value": "816 ms",
+          "value": "912 ms",
           "limit": "3.000 s",
           "status": "working"
         },
@@ -251,28 +251,28 @@
         {
           "metric": "HTML Transfer Size",
           "type": "transferSize",
-          "value": "76.3 KB",
+          "value": "76.4 KB",
           "limit": "127.0 KB",
           "status": "working"
         },
         {
           "metric": "CSS Transfer Size",
           "type": "transferSize",
-          "value": "76.4 KB",
+          "value": "76.5 KB",
           "limit": "107.4 KB",
           "status": "working"
         },
         {
           "metric": "JavaScript Transfer Size",
           "type": "transferSize",
-          "value": "175.4 KB",
+          "value": "175.2 KB",
           "limit": "1.0 MB",
           "status": "working"
         },
         {
           "metric": "Image Transfer Size",
           "type": "transferSize",
-          "value": "827.8 KB",
+          "value": "827.9 KB",
           "limit": "976.6 KB",
           "status": "working"
         },
