@@ -1,12 +1,12 @@
 {
-  "generated": "2026-10-06T03:15:09.255060+00:00",
+  "generated": "2026-10-07T03:16:06.433214+00:00",
   "origin": "https://www.squadstack.ai",
   "url": "https://www.squadstack.ai/",
   "field": {
     "mobile": {
       "metrics": {
         "LCP": {
-          "value": 4306.0,
+          "value": 4297.0,
           "zone": "red"
         },
         "INP": {
@@ -18,11 +18,11 @@
           "zone": "green"
         },
         "FCP": {
-          "value": 3291.0,
+          "value": 3334.0,
           "zone": "red"
         },
         "TTFB": {
-          "value": 1942.0,
+          "value": 1947.0,
           "zone": "red"
         }
       },
@@ -32,11 +32,11 @@
     "desktop": {
       "metrics": {
         "LCP": {
-          "value": 1603.0,
+          "value": 1613.0,
           "zone": "green"
         },
         "INP": {
-          "value": 79.0,
+          "value": 78.0,
           "zone": "green"
         },
         "CLS": {
@@ -44,11 +44,11 @@
           "zone": "green"
         },
         "FCP": {
-          "value": 1361.0,
+          "value": 1358.0,
           "zone": "green"
         },
         "TTFB": {
-          "value": 730.0,
+          "value": 696.0,
           "zone": "green"
         }
       },
@@ -63,7 +63,7 @@
         {
           "metric": "Largest Contentful Paint",
           "type": "googleWebVitals",
-          "value": "2.900 s",
+          "value": "1.988 s",
           "limit": "3.000 s",
           "status": "working"
         },
@@ -91,7 +91,7 @@
         {
           "metric": "First Contentful Paint",
           "type": "googleWebVitals",
-          "value": "2.900 s",
+          "value": "1.988 s",
           "limit": "3.000 s",
           "status": "working"
         },
@@ -133,21 +133,21 @@
         {
           "metric": "HTML Transfer Size",
           "type": "transferSize",
-          "value": "76.4 KB",
+          "value": "76.6 KB",
           "limit": "127.0 KB",
           "status": "working"
         },
         {
           "metric": "CSS Transfer Size",
           "type": "transferSize",
-          "value": "76.6 KB",
+          "value": "76.3 KB",
           "limit": "107.4 KB",
           "status": "working"
         },
         {
           "metric": "JavaScript Transfer Size",
           "type": "transferSize",
-          "value": "175.3 KB",
+          "value": "176.5 KB",
           "limit": "781.3 KB",
           "status": "working"
         },
@@ -168,7 +168,7 @@
         {
           "metric": "Third Party Transfer Size",
           "type": "thirdParty",
-          "value": "967.2 KB",
+          "value": "968.0 KB",
           "limit": "1.5 MB",
           "status": "working"
         }
@@ -181,7 +181,7 @@
         {
           "metric": "Largest Contentful Paint",
           "type": "googleWebVitals",
-          "value": "1.968 s",
+          "value": "1.640 s",
           "limit": "2.000 s",
           "status": "working"
         },
@@ -202,14 +202,14 @@
         {
           "metric": "Time to First Byte",
           "type": "googleWebVitals",
-          "value": "150 ms",
+          "value": "158 ms",
           "limit": "500 ms",
           "status": "working"
         },
         {
           "metric": "First Contentful Paint",
           "type": "googleWebVitals",
-          "value": "912 ms",
+          "value": "648 ms",
           "limit": "3.000 s",
           "status": "working"
         },
@@ -251,21 +251,21 @@
         {
           "metric": "HTML Transfer Size",
           "type": "transferSize",
-          "value": "76.4 KB",
+          "value": "76.6 KB",
           "limit": "127.0 KB",
           "status": "working"
         },
         {
           "metric": "CSS Transfer Size",
           "type": "transferSize",
-          "value": "76.5 KB",
+          "value": "76.4 KB",
           "limit": "107.4 KB",
           "status": "working"
         },
         {
           "metric": "JavaScript Transfer Size",
           "type": "transferSize",
-          "value": "175.2 KB",
+          "value": "176.5 KB",
           "limit": "1.0 MB",
           "status": "working"
         },
