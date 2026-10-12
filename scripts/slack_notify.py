@@ -21,20 +21,18 @@ def load_breaches(path):
             data = json.load(f)
     except Exception:
         return breaches
-    # Sitespeed budgetResult.json is a list of checks, each with status and metric info.
-    items = data if isinstance(data, list) else data.get("results", data.get("budget", []))
-    if isinstance(items, dict):
-        items = [items]
-    for it in items or []:
-        if not isinstance(it, dict):
-            continue
-        status = str(it.get("status", "")).lower()
-        if status and status != "fail":
-            continue
-        metric = it.get("metric") or it.get("name") or it.get("key") or "metric"
-        value = it.get("value", it.get("actual", "?"))
-        limit = it.get("limit", it.get("budget", it.get("max", "?")))
-        breaches.append(f"{metric}: {value} (limit {limit})")
+    # Sitespeed budgetResult.json groups failures under "failing":
+    #   { "failing": { "<url>": [ {metric, friendlyValue, friendlyLimit, value, limit}, ... ] } }
+    failing = data.get("failing", {}) if isinstance(data, dict) else {}
+    for url, items in (failing or {}).items():
+        for it in items or []:
+            if not isinstance(it, dict):
+                continue
+            metric = it.get("metric") or it.get("name") or "metric"
+            # Prefer the human-readable friendly values; fall back to raw.
+            value = it.get("friendlyValue", it.get("value", "?"))
+            limit = it.get("friendlyLimit", it.get("limit", "?"))
+            breaches.append(f"{metric}: {value} (limit {limit})")
     return breaches
 
 def post(token, channel, text):
