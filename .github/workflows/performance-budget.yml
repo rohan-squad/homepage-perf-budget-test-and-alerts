@@ -62,11 +62,14 @@ jobs:
           # Sitespeed writes budgetResult.json under the output folder.
           AMBER_FILE=$(find out-${{ matrix.device }}/amber -name 'budgetResult.json' | head -1)
           echo "file=$AMBER_FILE" >> "$GITHUB_OUTPUT"
-          if [ -n "$AMBER_FILE" ] && grep -q '"status":"fail"' "$AMBER_FILE"; then
-            echo "breached=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "breached=false" >> "$GITHUB_OUTPUT"
+          # A breach = the "failing" object has at least one entry. Parse it properly
+          # rather than grepping for a string that isn't in the file.
+          BREACHED=false
+          if [ -n "$AMBER_FILE" ]; then
+            BREACHED=$(python3 -c "import json,sys; d=json.load(open('$AMBER_FILE')); print('true' if d.get('failing') else 'false')" 2>/dev/null || echo false)
           fi
+          echo "breached=$BREACHED" >> "$GITHUB_OUTPUT"
+          echo "Amber breached: $BREACHED"
 
       - name: Post amber heads-up to Slack
         if: steps.amber.outputs.breached == 'true'
@@ -186,13 +189,13 @@ jobs:
           python3 scripts/build_dashboard_data.py \
             --mobile-budget "${{ steps.find.outputs.mobile }}" \
             --desktop-budget "${{ steps.find.outputs.desktop }}" \
-            --out docs/dashboard-data.json
+            --out dashboard/dashboard-data.json
 
       - name: Commit dashboard data
         run: |
           git config user.name "perf-budget-bot"
           git config user.email "actions@github.com"
-          git add docs/dashboard-data.json
+          git add dashboard/dashboard-data.json
           if git diff --staged --quiet; then
             echo "No dashboard data change."
           else
