@@ -53,6 +53,24 @@
   .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--dim);margin-top:6px}
   .legend span{display:inline-flex;align-items:center;gap:6px}
   .wide{grid-column:1/-1}
+
+  .trends{margin-top:40px}
+  .trends .sech{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--accent);font-weight:700;margin:30px 0 4px}
+  .trends .sub-note{color:var(--faint);font-size:12.5px;margin:0 0 14px}
+  .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:720px){.chart-grid{grid-template-columns:1fr}}
+  .chart-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .chart-card h3{margin:0 0 2px;font-size:14px}
+  .chart-card .unit{font-size:11.5px;color:var(--faint);margin-bottom:8px}
+  .chart-legend{display:flex;gap:14px;font-size:11.5px;color:var(--dim);margin-top:8px}
+  .chart-legend span{display:inline-flex;align-items:center;gap:6px}
+  .lk{width:16px;height:0;border-top:2px solid var(--dim)}
+  .lk.mob{border-top-style:solid}
+  .lk.desk{border-top-style:dashed}
+  .chart-svg{width:100%;height:120px;display:block}
+  .cp-dot{fill:var(--ink)}
+  .trend-empty{color:var(--faint);font-size:13px;padding:10px 0}
+  
 </style>
 </head>
 <body>
@@ -62,6 +80,14 @@
     <div class="sub" id="sub">Loading…</div>
   </header>
 
+  <section class="trends" id="trends">
+  <div class="sech">Trends — last 90 days</div>
+  <p class="sub-note">Mobile (solid) vs Desktop (dashed). Bands show green / amber / red zones. Lab TTFB is origin-dependent and naturally noisy day to day.</p>
+  <div id="trend-field"></div>
+  <div class="sech" style="margin-top:28px">Lab trends</div>
+  <div id="trend-lab"></div>
+  </section>
+ 
   <div class="rule-note">
     <strong>Two sources, two jobs.</strong> <b>Field</b> (CrUX, real users) decides whether we <em>pass Core Web Vitals</em>.
     <b>Lab</b> (Sitespeed, this run) decides whether a change <em>regressed</em>. They're shown separately and never blended.
@@ -150,5 +176,124 @@ fetch('dashboard-data.json?_='+Date.now())
     document.getElementById('sub').textContent='';
   });
 </script>
+
+  <script>
+(function(){
+  // Zone thresholds [green-max, amber-max] in the metric's native unit (ms, or count, or KB).
+  const FIELD_ZONES = {
+    LCP:{g:2500,a:3500,unit:'ms'}, INP:{g:200,a:300,unit:'ms'},
+    FCP:{g:1800,a:3000,unit:'ms'}, CLS:{g:0.1,a:0.25,unit:''}
+  };
+  // Lab zones use the red lines from budget.json (mobile ceilings; close enough for a shared band).
+  const LAB_ZONES = {
+    LCP:{g:2000,a:3000,unit:'ms'}, TTFB:{g:600,a:1000,unit:'ms'},
+    requests:{g:100,a:140,unit:''}, transfer:{g:2048,a:3072,unit:'KB'}
+  };
+  const FIELD_METRICS = ['LCP','INP','FCP','CLS'];
+  const LAB_METRICS   = ['LCP','TTFB','requests','transfer'];
+
+  // Parse a lab value that may be a unit string ("2.156 s", "725 ms", "1.0 MB", "1.2 GB") or a number.
+  function toNum(v){
+    if(v==null) return null;
+    if(typeof v==='number') return v;
+    const s=String(v).trim();
+    const m=s.match(/^([\d.]+)\s*(s|ms|GB|MB|KB|B)?$/i);
+    if(!m) return null;
+    let n=parseFloat(m[1]); const u=(m[2]||'').toLowerCase();
+    if(u==='s') return n*1000;        // -> ms
+    if(u==='gb') return n*1024*1024;  // -> KB
+    if(u==='mb') return n*1024;       // -> KB
+    if(u==='b')  return n/1024;       // -> KB
+    return n;                         // ms, KB, or unitless count as-is
+  }
+  function fmtTick(metric, zones, v){
+    if(v==null) return '';
+    if(zones.unit==='ms') return v>=1000 ? (v/1000).toFixed(1)+'s' : Math.round(v)+'ms';
+    if(zones.unit==='KB') return v>=1024 ? (v/1024).toFixed(1)+'MB' : Math.round(v)+'KB';
+    if(metric==='CLS') return (Math.round(v*1000)/1000).toString();
+    return Math.round(v).toString();
+  }
+
+  function drawChart(metric, zones, series){
+    // series = {mobile:[{date,val}], desktop:[{date,val}]}
+    const W=300, H=120, padL=34, padR=8, padT=8, padB=18;
+    const all=[...series.mobile, ...series.desktop].map(d=>d.val).filter(v=>v!=null);
+    const dates=[...new Set([...series.mobile, ...series.desktop].map(d=>d.date))].sort();
+    if(all.length===0 || dates.length===0){
+      return '<div class="trend-empty">No data yet.</div>';
+    }
+    // y-axis max: a bit above the larger of (data max, amber line)
+    const dataMax=Math.max(...all, zones.a);
+    const ymax=dataMax*1.1, ymin=0;
+    const x=i=> padL + (dates.length<=1 ? (W-padL-padR)/2 : i*(W-padL-padR)/(dates.length-1));
+    const y=v=> padT + (H-padT-padB) * (1 - (v-ymin)/(ymax-ymin||1));
+    const xi=d=> dates.indexOf(d);
+
+    // zone bands (green 0..g, amber g..a, red a..top)
+    function band(lo,hi,cls){
+      const yl=y(Math.min(hi,ymax)), yh=y(Math.min(lo,ymax));
+      return `<rect x="${padL}" y="${yl}" width="${W-padL-padR}" height="${Math.max(0,yh-yl)}" fill="var(--${cls}-bg)" opacity="0.5"/>`;
+    }
+    let svg=`<svg class="chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="${metric} trend">`;
+    svg+=band(0,zones.g,'green')+band(zones.g,zones.a,'amber')+band(zones.a,ymax,'red');
+    // y ticks: green line + amber line
+    [zones.g,zones.a].forEach(t=>{
+      if(t<=ymax){ svg+=`<line x1="${padL}" x2="${W-padR}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line)" stroke-width="0.5"/>`;
+        svg+=`<text x="2" y="${y(t)+3}" font-size="8" fill="var(--faint)">${fmtTick(metric,zones,t)}</text>`; }
+    });
+    // line path for a device
+    function path(pts, dashed){
+      const valid=pts.filter(p=>p.val!=null);
+      if(valid.length===0) return '';
+      const d=valid.map((p,i)=>`${i===0?'M':'L'}${x(xi(p.date)).toFixed(1)},${y(p.val).toFixed(1)}`).join(' ');
+      const dots=valid.map(p=>`<circle class="cp-dot" cx="${x(xi(p.date)).toFixed(1)}" cy="${y(p.val).toFixed(1)}" r="2"/>`).join('');
+      return `<path d="${d}" fill="none" stroke="var(--ink)" stroke-width="1.5" ${dashed?'stroke-dasharray="4 3"':''}/>${dots}`;
+    }
+    svg+=path(series.mobile,false)+path(series.desktop,true);
+    svg+=`</svg>`;
+    const latest = series.mobile.filter(p=>p.val!=null).slice(-1)[0];
+    return svg;
+  }
+
+  function buildSeries(history, section, metric){
+    const m=[], d=[];
+    history.forEach(rec=>{
+      const date=rec.date;
+      const mv = rec[section] && rec[section].mobile ? rec[section].mobile[metric] : null;
+      const dv = rec[section] && rec[section].desktop ? rec[section].desktop[metric] : null;
+      m.push({date, val: section==='lab' ? toNum(mv) : (mv==null?null:Number(mv))});
+      d.push({date, val: section==='lab' ? toNum(dv) : (dv==null?null:Number(dv))});
+    });
+    return {mobile:m, desktop:d};
+  }
+
+  function renderSection(elId, history, section, metrics, zonesMap){
+    let html='<div class="chart-grid">';
+    metrics.forEach(metric=>{
+      const zones=zonesMap[metric];
+      const series=buildSeries(history, section, metric);
+      html+=`<div class="chart-card"><h3>${metric}</h3>
+        <div class="unit">${section==='field'?'CrUX field':'Sitespeed lab'} · ${zones.unit||'score'}</div>
+        ${drawChart(metric,zones,series)}
+        <div class="chart-legend"><span><i class="lk mob"></i>Mobile</span><span><i class="lk desk"></i>Desktop</span></div>
+      </div>`;
+    });
+    html+='</div>';
+    document.getElementById(elId).innerHTML=html;
+  }
+
+  fetch('history.json?_='+Date.now())
+    .then(r=>{ if(!r.ok) throw new Error('no history yet'); return r.json(); })
+    .then(history=>{
+      if(!Array.isArray(history) || history.length===0){
+        document.getElementById('trends').style.display='none'; return;
+      }
+      renderSection('trend-field', history, 'field', FIELD_METRICS, FIELD_ZONES);
+      renderSection('trend-lab',   history, 'lab',   LAB_METRICS,   LAB_ZONES);
+    })
+    .catch(()=>{ document.getElementById('trends').style.display='none'; });
+})();
+</script>
+  
 </body>
 </html>
