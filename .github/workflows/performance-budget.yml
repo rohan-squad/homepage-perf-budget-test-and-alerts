@@ -195,7 +195,7 @@ jobs:
         run: |
           git config user.name "perf-budget-bot"
           git config user.email "actions@github.com"
-          git add docs/dashboard-data.json
+          git add docs/dashboard-data.json docs/history.json
           if git diff --staged --quiet; then
             echo "No dashboard data change."
           else
