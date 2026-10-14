@@ -159,6 +159,66 @@ def read_lab(path):
     result["failing_count"] = n_fail
     return result
 
+def append_history(out_path, payload):
+    """
+    Option A storage: append a compact record of this run to docs/history.json,
+    trimmed to the last 90 days. Kept as its own function so switching to
+    per-file storage (Option B) later is a localised change.
+    """
+    import os
+    hist_path = os.path.join(os.path.dirname(out_path) or ".", "history.json")
+
+    def field_vals(ff):
+        m = payload["field"].get(ff, {}).get("metrics", {})
+        return {k: (m.get(k, {}) or {}).get("value") for k in ("LCP", "INP", "FCP", "CLS")}
+
+    def lab_vals(ff):
+        # Pull the raw numeric values for the lab metrics we trend.
+        wanted = {
+            "Largest Contentful Paint": "LCP",
+            "Time to First Byte": "TTFB",
+            "Total Requests": "requests",
+            "Total Transfer Size": "transfer",
+        }
+        out = {}
+        for it in payload["lab"].get(ff, {}).get("metrics", []):
+            short = wanted.get(it.get("metric"))
+            if short:
+                out[short] = it.get("value")
+        return out
+
+    record = {
+        "date": payload["generated"][:10],   # YYYY-MM-DD
+        "generated": payload["generated"],
+        "field": {"mobile": field_vals("mobile"), "desktop": field_vals("desktop")},
+        "lab":   {"mobile": lab_vals("mobile"),   "desktop": lab_vals("desktop")},
+    }
+
+    # Load existing history (tolerate missing/corrupt file).
+    history = []
+    if os.path.exists(hist_path):
+        try:
+            with open(hist_path) as f:
+                history = json.load(f)
+            if not isinstance(history, list):
+                history = []
+        except Exception:
+            history = []
+
+    # Replace same-day record if the workflow ran twice in one day, else append.
+    history = [r for r in history if r.get("date") != record["date"]]
+    history.append(record)
+
+    # Trim to last 90 days by date.
+    import datetime as _dt
+    cutoff = (_dt.date.today() - _dt.timedelta(days=90)).isoformat()
+    history = [r for r in history if r.get("date", "") >= cutoff]
+    history.sort(key=lambda r: r.get("date", ""))
+
+    with open(hist_path, "w") as f:
+        json.dump(history, f, indent=2)
+    print(f"Appended history record for {record['date']} ({len(history)} days retained)")
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--mobile-budget", required=True)
@@ -216,6 +276,7 @@ def main():
     with open(args.out, "w") as f:
         json.dump(payload, f, indent=2)
     print(f"Wrote {args.out}")
+    append_history(args.out, payload)
 
 if __name__ == "__main__":
     main()
