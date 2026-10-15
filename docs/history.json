@@ -33,31 +33,31 @@
   },
   {
     "date": "2026-10-15",
-    "generated": "2026-10-15T03:26:31.487147+00:00",
+    "generated": "2026-10-15T13:50:25.626822+00:00",
     "field": {
       "mobile": {
-        "LCP": 4146.0,
-        "INP": 298.0,
-        "FCP": 3393.0,
+        "LCP": 4092.0,
+        "INP": 297.0,
+        "FCP": 3383.0,
         "CLS": 0.0
       },
       "desktop": {
-        "LCP": 1745.0,
-        "INP": 76.0,
-        "FCP": 1435.0,
+        "LCP": 1752.0,
+        "INP": 75.0,
+        "FCP": 1428.0,
         "CLS": 0.01
       }
     },
     "lab": {
       "mobile": {
-        "LCP": "2.004 s",
-        "TTFB": "634 ms",
+        "LCP": "1.992 s",
+        "TTFB": "588 ms",
         "requests": 93,
         "transfer": "1.0 MB"
       },
       "desktop": {
-        "LCP": "1.816 s",
-        "TTFB": "172 ms",
+        "LCP": "1.764 s",
+        "TTFB": "144 ms",
         "requests": 117,
         "transfer": "1.2 MB"
       }
