@@ -65,7 +65,7 @@
   },
   {
     "date": "2026-10-16",
-    "generated": "2026-10-16T06:35:59.214195+00:00",
+    "generated": "2026-10-16T06:43:47.589721+00:00",
     "field": {
       "mobile": {
         "LCP": 4092.0,
@@ -82,14 +82,14 @@
     },
     "lab": {
       "mobile": {
-        "LCP": "1.888 s",
-        "TTFB": "569 ms",
+        "LCP": "2.024 s",
+        "TTFB": "634 ms",
         "requests": 92,
         "transfer": "1.0 MB"
       },
       "desktop": {
-        "LCP": "1.688 s",
-        "TTFB": "130 ms",
+        "LCP": "1.704 s",
+        "TTFB": "120 ms",
         "requests": 115,
         "transfer": "1.2 MB"
       }
