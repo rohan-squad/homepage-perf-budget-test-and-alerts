@@ -1,16 +1,16 @@
 {
-  "generated": "2026-10-16T07:04:36.519939+00:00",
+  "generated": "2026-10-16T07:13:08.056292+00:00",
   "origin": "https://www.squadstack.ai",
   "url": "https://www.squadstack.ai/",
   "field": {
     "mobile": {
       "metrics": {
         "LCP": {
-          "value": 4092.0,
+          "value": 4018.0,
           "zone": "red"
         },
         "INP": {
-          "value": 297.0,
+          "value": 295.0,
           "zone": "amber"
         },
         "CLS": {
@@ -18,11 +18,11 @@
           "zone": "green"
         },
         "FCP": {
-          "value": 3383.0,
+          "value": 3351.0,
           "zone": "red"
         },
         "TTFB": {
-          "value": 1948.0,
+          "value": 1939.0,
           "zone": "red"
         }
       },
@@ -32,11 +32,11 @@
     "desktop": {
       "metrics": {
         "LCP": {
-          "value": 1752.0,
+          "value": 1753.0,
           "zone": "green"
         },
         "INP": {
-          "value": 75.0,
+          "value": 76.0,
           "zone": "green"
         },
         "CLS": {
@@ -44,11 +44,11 @@
           "zone": "green"
         },
         "FCP": {
-          "value": 1428.0,
+          "value": 1435.0,
           "zone": "green"
         },
         "TTFB": {
-          "value": 753.0,
+          "value": 760.0,
           "zone": "green"
         }
       },
@@ -63,7 +63,7 @@
         {
           "metric": "Largest Contentful Paint",
           "type": "googleWebVitals",
-          "value": "1.908 s",
+          "value": "2.108 s",
           "limit": "3.000 s",
           "status": "working"
         },
@@ -84,14 +84,14 @@
         {
           "metric": "Time to First Byte",
           "type": "googleWebVitals",
-          "value": "571 ms",
+          "value": "600 ms",
           "limit": "1.000 s",
           "status": "working"
         },
         {
           "metric": "First Contentful Paint",
           "type": "googleWebVitals",
-          "value": "1.908 s",
+          "value": "2.108 s",
           "limit": "3.000 s",
           "status": "working"
         },
@@ -147,7 +147,7 @@
         {
           "metric": "JavaScript Transfer Size",
           "type": "transferSize",
-          "value": "176.3 KB",
+          "value": "176.9 KB",
           "limit": "781.3 KB",
           "status": "working"
         },
@@ -168,7 +168,7 @@
         {
           "metric": "Third Party Transfer Size",
           "type": "thirdParty",
-          "value": "952.9 KB",
+          "value": "953.5 KB",
           "limit": "1.5 MB",
           "status": "working"
         }
@@ -181,7 +181,7 @@
         {
           "metric": "Largest Contentful Paint",
           "type": "googleWebVitals",
-          "value": "1.816 s",
+          "value": "1.720 s",
           "limit": "2.000 s",
           "status": "working"
         },
@@ -202,14 +202,14 @@
         {
           "metric": "Time to First Byte",
           "type": "googleWebVitals",
-          "value": "306 ms",
+          "value": "152 ms",
           "limit": "500 ms",
           "status": "working"
         },
         {
           "metric": "First Contentful Paint",
           "type": "googleWebVitals",
-          "value": "792 ms",
+          "value": "712 ms",
           "limit": "3.000 s",
           "status": "working"
         },
@@ -272,7 +272,7 @@
         {
           "metric": "Image Transfer Size",
           "type": "transferSize",
-          "value": "811.8 KB",
+          "value": "812.1 KB",
           "limit": "976.6 KB",
           "status": "working"
         },

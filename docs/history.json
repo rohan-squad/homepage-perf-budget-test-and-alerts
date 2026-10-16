@@ -65,31 +65,31 @@
   },
   {
     "date": "2026-10-16",
-    "generated": "2026-10-16T07:04:36.519939+00:00",
+    "generated": "2026-10-16T07:13:08.056292+00:00",
     "field": {
       "mobile": {
-        "LCP": 4092.0,
-        "INP": 297.0,
-        "FCP": 3383.0,
+        "LCP": 4018.0,
+        "INP": 295.0,
+        "FCP": 3351.0,
         "CLS": 0.0
       },
       "desktop": {
-        "LCP": 1752.0,
-        "INP": 75.0,
-        "FCP": 1428.0,
+        "LCP": 1753.0,
+        "INP": 76.0,
+        "FCP": 1435.0,
         "CLS": 0.01
       }
     },
     "lab": {
       "mobile": {
-        "LCP": "1.908 s",
-        "TTFB": "571 ms",
+        "LCP": "2.108 s",
+        "TTFB": "600 ms",
         "requests": 92,
         "transfer": "1.0 MB"
       },
       "desktop": {
-        "LCP": "1.816 s",
-        "TTFB": "306 ms",
+        "LCP": "1.720 s",
+        "TTFB": "152 ms",
         "requests": 115,
         "transfer": "1.2 MB"
       }
