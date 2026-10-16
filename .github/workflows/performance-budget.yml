@@ -195,12 +195,25 @@ jobs:
         run: |
           git config user.name "perf-budget-bot"
           git config user.email "actions@github.com"
+          # Save the freshly generated files aside.
+          cp docs/dashboard-data.json /tmp/dashboard-data.json
+          cp docs/history.json /tmp/history.json 2>/dev/null || true
+
+          # Get the latest main WITHOUT trying to merge our changes into it.
+          git stash --include-untracked || true
+          git fetch origin main
+          git reset --hard origin/main
+
+          # Restore our fresh data on top of the latest main (ours wins — it's newest).
+          mkdir -p docs
+          cp /tmp/dashboard-data.json docs/dashboard-data.json
+          cp /tmp/history.json docs/history.json 2>/dev/null || true
+
           git add docs/dashboard-data.json docs/history.json
           if git diff --staged --quiet; then
             echo "No dashboard data change."
           else
             git commit -m "Update dashboard data [skip ci]"
-            # pull any commits that landed since checkout, then push (retry once)
-            git pull --rebase origin main || true
-            git push || (git pull --rebase origin main && git push)
+            # Simple push onto the latest main; retry once if the remote moved again.
+            git push origin HEAD:main || (git fetch origin main && git reset --hard origin/main && cp /tmp/dashboard-data.json docs/dashboard-data.json && cp /tmp/history.json docs/history.json 2>/dev/null || true && git add docs/ && git commit -m "Update dashboard data [skip ci]" && git push origin HEAD:main)
           fi
