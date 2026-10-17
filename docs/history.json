@@ -84,5 +84,37 @@
       "mobile": {},
       "desktop": {}
     }
+  },
+  {
+    "date": "2026-10-17",
+    "generated": "2026-10-17T03:28:40.361930+00:00",
+    "field": {
+      "mobile": {
+        "LCP": 4018.0,
+        "INP": 295.0,
+        "FCP": 3351.0,
+        "CLS": 0.0
+      },
+      "desktop": {
+        "LCP": 1753.0,
+        "INP": 76.0,
+        "FCP": 1435.0,
+        "CLS": 0.01
+      }
+    },
+    "lab": {
+      "mobile": {
+        "LCP": "2.076 s",
+        "TTFB": "745 ms",
+        "requests": 92,
+        "transfer": "1.0 MB"
+      },
+      "desktop": {
+        "LCP": "1.772 s",
+        "TTFB": "188 ms",
+        "requests": 115,
+        "transfer": "1.2 MB"
+      }
+    }
   }
 ]
