@@ -279,31 +279,31 @@
   },
   {
     "date": "2026-10-23",
-    "generated": "2026-10-23T03:33:28.659263+00:00",
+    "generated": "2026-10-23T15:03:26.911454+00:00",
     "field": {
       "mobile": {
-        "LCP": 3555.0,
-        "INP": 279.0,
-        "FCP": 3281.0,
+        "LCP": 3509.0,
+        "INP": 273.0,
+        "FCP": 3257.0,
         "CLS": 0.0
       },
       "desktop": {
-        "LCP": 1744.0,
+        "LCP": 1745.0,
         "INP": 73.0,
-        "FCP": 1402.0,
+        "FCP": 1430.0,
         "CLS": 0.0
       }
     },
     "lab": {
       "mobile": {
-        "LCP": "1.924 s",
-        "TTFB": "571 ms",
+        "LCP": "2.008 s",
+        "TTFB": "614 ms",
         "requests": 92,
         "transfer": "1.0 MB"
       },
       "desktop": {
-        "LCP": "1.728 s",
-        "TTFB": "120 ms",
+        "LCP": "1.732 s",
+        "TTFB": "189 ms",
         "requests": 115,
         "transfer": "1.2 MB"
       }
