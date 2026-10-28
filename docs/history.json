@@ -439,31 +439,31 @@
   },
   {
     "date": "2026-10-28",
-    "generated": "2026-10-28T03:43:25.983404+00:00",
+    "generated": "2026-10-28T09:46:17.807876+00:00",
     "field": {
       "mobile": {
-        "LCP": 3316.0,
-        "INP": 260.0,
-        "FCP": 3142.0,
+        "LCP": 3294.0,
+        "INP": 269.0,
+        "FCP": 3115.0,
         "CLS": 0.0
       },
       "desktop": {
-        "LCP": 1745.0,
+        "LCP": 1737.0,
         "INP": 72.0,
-        "FCP": 1401.0,
+        "FCP": 1417.0,
         "CLS": 0.0
       }
     },
     "lab": {
       "mobile": {
-        "LCP": "2.024 s",
-        "TTFB": "605 ms",
+        "LCP": "1.912 s",
+        "TTFB": "595 ms",
         "requests": 92,
-        "transfer": "1.0 MB"
+        "transfer": "1023.4 KB"
       },
       "desktop": {
-        "LCP": "1.704 s",
-        "TTFB": "170 ms",
+        "LCP": "1.680 s",
+        "TTFB": "135 ms",
         "requests": 115,
         "transfer": "1.2 MB"
       }
