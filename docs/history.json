@@ -1300,5 +1300,37 @@
         "transfer": "1.1 MB"
       }
     }
+  },
+  {
+    "date": "2026-11-24",
+    "generated": "2026-11-24T13:29:05.434743+00:00",
+    "field": {
+      "mobile": {
+        "LCP": 3078.0,
+        "INP": 242.0,
+        "FCP": 2921.0,
+        "CLS": 0.0
+      },
+      "desktop": {
+        "LCP": 1824.0,
+        "INP": 71.0,
+        "FCP": 1516.0,
+        "CLS": 0.0
+      }
+    },
+    "lab": {
+      "mobile": {
+        "LCP": "1.572 s",
+        "TTFB": "611 ms",
+        "requests": 93,
+        "transfer": "967.6 KB"
+      },
+      "desktop": {
+        "LCP": "1.576 s",
+        "TTFB": "152 ms",
+        "requests": 116,
+        "transfer": "1.1 MB"
+      }
+    }
   }
 ]
